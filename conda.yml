@@ -8,3 +8,4 @@ dependencies:
   - pandas
   - scikit-learn
   - pyspark=2.4.3
+  - jupyter
