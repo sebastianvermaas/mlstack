@@ -15,7 +15,9 @@ Initial versions assume that you have **Ubuntu 16.04** as your operating system.
 
 ## Design
 <br>
+<br>
 
+**ds-stack**
 <p align="center">
     <img src='docs/design.png' height=300>
 </p>
