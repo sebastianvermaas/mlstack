@@ -65,7 +65,7 @@ class MLStack:
                 message = "Could not read and/or set attributes from {file}".format(
                     file=config_path
                 )
-                logging.error(message)
+                logger.error(message)
                 raise yamlerror
 
     @staticmethod
@@ -80,9 +80,7 @@ class MLStack:
         :returns k8s_api: A KubeApi object
 
         """
-
         logger.info("Initializing Kubernetes API")
-        """ Initializes the Kubernetes CoreApiV1 """
         kubernetes.config.load_kube_config(kube_config)
         config = KubeConfig()
         config.assert_hostname = False
@@ -92,8 +90,8 @@ class MLStack:
     @staticmethod
     def init_docker():
         """ Initializes a Docker APIClient. See `docker.APIClient` for more info """
-        logging.info("Initializing Docker API")
-        return docker.APIClient
+        logger.info("Initializing Docker API")
+        return docker.APIClient()
 
     @staticmethod
     def init_botoclient(service: str, endpoint_url: str):
@@ -134,18 +132,18 @@ class MLStack:
             with open(dockerfile_path, "r") as dpath:
                 dockerfile = dpath.read()
 
-            f = io.BytesIO(dockerfile.encode("utf-8"))
             logger.info(
                 "Building Docker image {tag} from {path}".format(
                     tag=tag, path=dockerfile_path
                 )
             )
 
-            for line in self.docker_api.build(fileobj=f, rm=True, tag=tag):
+            byte_stream = io.BytesIO(dockerfile.encode("utf-8"))
+
+            for line in self.docker_api.build(fileobj=byte_stream, rm=True, tag=tag):
                 stream = ast.literal_eval(line.decode("utf-8")).get("stream", None)
                 aux = ast.literal_eval(line.decode("utf-8")).get("aux", None)
                 error = ast.literal_eval(line.decode("utf-8")).get("error", None)
-
                 logger.info(stream.replace("\n", "")) if stream else None
                 logger.info(aux.replace("\n", "")) if stream else None
                 logger.error(error.replace("\n", "")) if error else None
