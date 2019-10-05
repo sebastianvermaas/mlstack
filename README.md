@@ -30,3 +30,4 @@ The design is in terms of the Kubernetes Pods. TODO: include Miniconda developme
 - [**Docker / Kubernetes**](#kubernetes): Base images and Pod executables
 - [**Spark**](#spark): Kubernetes Pod for executing spark-submit jobs
 - [**Localstack**](#localstack): Local environment that mimics AWS Cloud (S3, DynamoDB)
+- [**Tensorflow**](#tensorflow): Kubernetes Pod for training and predicting with Tensorflow models
