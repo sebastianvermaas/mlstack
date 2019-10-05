@@ -73,11 +73,13 @@ class MLStack:
         """
         Initializes a Kubernetes CoreV1Api object.
 
-        :param kube_config: Path to a Kubernetes config file.
-                            See `kubectl config set` for more
-                            information.
+        Parameters
+          kube_config: Path to a Kubernetes config file.
+                       See `kubectl config set` for more
+                       information.
 
-        :returns k8s_api: A KubeApi object
+        Returns
+          k8s_api: A KubeApi object
 
         """
         logger.info("Initializing Kubernetes API")
@@ -98,8 +100,12 @@ class MLStack:
         """
         Initializes an AWS S3 BotoClient for S3 and DynamoDB.
 
-        :param service: Which AWS service to initialize a client for.
-        :returns botoclient: A Boto3 Client object.
+        Parameters
+          service: Which AWS service to initialize a \
+                   client for (i.e. `s3` or `dynamodb`)
+
+        Returns
+          botoclient: A Boto3 Client object.
 
         """
         logger.info("Initializing AWS Boto3 Client")
@@ -115,8 +121,11 @@ class MLStack:
         """
         Builds Docker images via the docker python API.
 
-        :param build_tags: A list of tags to build. Assumes that the image's
-                Dockerfile is located at `ml-stack/build/{tag}/Dockerfile
+        Parameters
+          build_tags: A list of tags to build. Assumes
+                      that the image's Dockerfile is
+                      located at
+                      `ml-stack/build/{tag}/Dockerfile`
 
         """
         if build_tags is None:
