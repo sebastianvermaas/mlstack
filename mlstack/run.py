@@ -3,25 +3,16 @@ from os import path, getcwd
 import io
 import ast
 import yaml
-import logging
 
 import boto3
 import docker
 import kubernetes
 from kubernetes.client import Configuration as KubeConfig
-from kubernetes.client import ExtensionsV1beta1Api as KubeExtensions
+
+# from kubernetes.client import ExtensionsV1beta1Api as KubeExtensions
 from kubernetes.client.apis.core_v1_api import CoreV1Api as KubeApi
-from kubernetes.client.
-global logger
 
-FORMAT = "%(asctime)s - %(levelname)s mlstack.%(module)s.%(funcName)s - %(message)s"
-FORMATTER = logging.Formatter(FORMAT, "%Y-%m-%d %H:%M:%S")
-
-log_handler = logging.StreamHandler()
-log_handler.setFormatter(FORMATTER)
-logger = logging.getLogger("ml-stack")
-logger.setLevel(logging.INFO)
-logger.addHandler(log_handler)
+from mlstack.utils import logger
 
 
 class MLStack:
@@ -40,72 +31,96 @@ class MLStack:
 
     def __init__(self, config_yaml: str = None):
         """ Initializes MLStack. Can be configures with a YAML configuration file """
+
+        logger.info("Initializing MLStack")
         # GPU attribute may be overwritten by config
         self.gpu = False
+        logger.warning("GPU set to %s ", self.gpu)
 
         if config_yaml:
             self.set_attributes(config_yaml)
 
-        logger.info("Initializing Kubernetes API")
         self.k8s_api = self.init_k8s()
-
-        logging.info("Initializing Docker API")
-        self.docker_api = docker.APIClient()
+        self.docker_api = self.init_docker()
 
     def set_attributes(self, config_yaml: str):
         """ Sets attributes based on a YAML configuration file """
-        logger.info(
-            "Setting attributes for MLStack object from {config_yaml}".format(
-                config_yaml=config_yaml
-            )
+        message = "Setting attributes for MLStack object from {config_yaml}".format(
+            config_yaml=config_yaml
         )
+        logger.info(message)
+
         config_path = path.join(getcwd(), config_yaml)
         with open(config_path, "r") as stream:
             try:
 
                 for key, value in yaml.safe_load(stream).items():
                     setattr(self, key, value)
-                    logger.info(
-                        "Set attribute MLStack.{attr} to '{value}'".format(
-                            attr=key, value=value
-                        )
+                    message = "Set attribute MLStack.{attr} to '{value}'".format(
+                        attr=key, value=value
                     )
+                    logger.info(message)
 
-            except yaml.YAMLError as exception:
-                logging.error(
-                    "Could not read and/or set attributes from {file}".format(
-                        file=config_path
-                    )
+            except yaml.YAMLError as yamlerror:
+                message = "Could not read and/or set attributes from {file}".format(
+                    file=config_path
                 )
-                raise (exception)
+                logging.error(message)
+                raise yamlerror
 
     @staticmethod
-    def init_k8s():
+    def init_k8s(kube_config: str = None):
+        """
+        Initializes a Kubernetes CoreV1Api object.
+
+        :param kube_config: Path to a Kubernetes config file.
+                            See `kubectl config set` for more
+                            information.
+
+        :returns k8s_api: A KubeApi object
+
+        """
+
+        logger.info("Initializing Kubernetes API")
         """ Initializes the Kubernetes CoreApiV1 """
-        kubernetes.config.load_kube_config()
+        kubernetes.config.load_kube_config(kube_config)
         config = KubeConfig()
         config.assert_hostname = False
         KubeConfig.set_default(config)
         return KubeApi()
 
     @staticmethod
+    def init_docker():
+        """ Initializes a Docker APIClient. See `docker.APIClient` for more info """
+        logging.info("Initializing Docker API")
+        return docker.APIClient
+
+    @staticmethod
     def init_botoclient(service: str, endpoint_url: str):
         """
-        Create a new aws client connected to ENDPOINT_URL
-        :return: an aws client
+        Initializes an AWS S3 BotoClient for S3 and DynamoDB.
+
+        :param service: Which AWS service to initialize a client for.
+        :returns botoclient: A Boto3 Client object.
+
         """
         logger.info("Initializing AWS Boto3 Client")
-        client = boto3.client(
+        botoclient = boto3.client(
             service,
             endpoint_url=endpoint_url,
             aws_access_key_id="foo",
             aws_secret_access_key="bar",
         )
-        logger.info("AWS Boto3 Client Initialized")
-        return client
+        return botoclient
 
     def dockerbuild(self, build_tags: list = None):
-        """ Builds Docker images """
+        """
+        Builds Docker images via the docker python API.
+
+        :param build_tags: A list of tags to build. Assumes that the image's
+                Dockerfile is located at `ml-stack/build/{tag}/Dockerfile
+
+        """
         if build_tags is None:
             build_tags = self.build_tags
 
@@ -132,6 +147,7 @@ class MLStack:
                 error = ast.literal_eval(line.decode("utf-8")).get("error", None)
 
                 logger.info(stream.replace("\n", "")) if stream else None
+                logger.info(aux.replace("\n", "")) if stream else None
                 logger.error(error.replace("\n", "")) if error else None
 
     def deploy(
@@ -146,4 +162,3 @@ class MLStack:
             data_path = self.data_path
 
         raise NotImplementedError()
-

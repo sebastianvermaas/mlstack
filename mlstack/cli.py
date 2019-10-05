@@ -5,6 +5,7 @@ from mlstack.run import MLStack
 
 
 def main():
+    """ Main entrypoint for `ml-stack` CLI """
     parser = argparse.ArgumentParser(description="")
     subparsers = parser.add_subparsers(dest="command")
     subparser_build = subparsers.add_parser("build")
