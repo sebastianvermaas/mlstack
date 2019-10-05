@@ -7,4 +7,14 @@ from mlstack.run import MLStack
 def main():
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("-c", "--config", type=str, default=None)
+
+    subparsers = parser.add_subparsers(dest="command")
+    subparser_build = subparsers.add_parser("build")
+    subparser_build.add_argument("-t", "--tags", default=None)
+
+    subparser_build = subparsers.add_parser("deploy")
+
     args = parser.parse_args()
+
+    if args.command == "build":
+        MLStack(args.config).dockerbuild(args.tags)
