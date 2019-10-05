@@ -79,7 +79,7 @@ class MLStack:
                        for more information.
 
         Returns
-          k8s_api: A KubeApi object
+          k8s_api: A CoreV1Api object
 
         """
         logger.info("Initializing Kubernetes API")
