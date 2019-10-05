@@ -32,10 +32,16 @@ class MLStack:
 
     build_tags = ["tensorflow"]
 
+    working_dir = getcwd()[: getcwd().index("ml-stack")]
+    scripts_path = path.join(working_dir, "ml-stack/scripts")
+    models_path = path.join(working_dir, "ml-stack/scripts")
+    data_path = path.join(working_dir, "ml-stack/data")
+
     def __init__(self, config_yaml: str = None):
         """ Initializes MLStack. Can be configures with a YAML configuration file """
         # GPU attribute may be overwritten by config
         self.gpu = False
+
         if config_yaml:
             self.set_attributes(config_yaml)
 
@@ -98,6 +104,7 @@ class MLStack:
         return client
 
     def dockerbuild(self, build_tags: list = None):
+        """ Builds Docker images """
         if build_tags is None:
             build_tags = self.build_tags
 
@@ -106,10 +113,7 @@ class MLStack:
                 tag = "-".join([tag, "gpu"])
 
             dockerfile_path = path.join(
-                getcwd()[: getcwd().index("ml-stack")],
-                "ml-stack/build",
-                tag,
-                "Dockerfile",
+                self.working_dir, "ml-stack/build", tag, "Dockerfile"
             )
             with open(dockerfile_path, "r") as dpath:
                 dockerfile = dpath.read()
@@ -129,3 +133,13 @@ class MLStack:
                 logger.info(stream.replace("\n", "")) if stream else None
                 logger.error(error.replace("\n", "")) if error else None
 
+    def deploy(
+        self, scripts_path: str = None, models_path: str = None, data_path: str = None
+    ):
+        """ Deploys MLStack to a local Kubernetes Cluster """
+        if scripts_path is None:
+            scripts_path = self.scripts_path
+        if models_path is None:
+            models_path = self.models_path
+        if data_path is None:
+            data_path = self.data_path
