@@ -34,15 +34,6 @@ else
 fi
 export PATH=$HOME/miniconda3/bin:$PATH
 
-# Install dependencies
-echo "----------------------------"
-echo "Setting up conda environment"
-echo "----------------------------"
-
-apt install python-opencv -yy
-conda update -n base -c defaults conda -yy
-conda env create -f conda.yml -yy
-
 # Install Docker
 echo "----------------------------"
 echo "Installing Docker"

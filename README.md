@@ -13,8 +13,24 @@ It is common for data scientists to be well equipped in languages and packages c
 Initial versions assume that you have **Ubuntu 18.04** as your operating system. Later versions may include other operating systems, GPU/non-gpu support, and dynamic OS checks.
 
 
-```sh
-sudo ./setup.sh
+```bash
+git clone https://github.com/sebastianvermaas/ml-stack.git
+
+cd ml-stack
+
+# Installs dependencies (not implemented)
+sudo ./install.sh
+
+# Sets up conda virtual environment
+conda env create -f conda.yml
+conda activate ml
+
+# Builds docker images
+ml-stack build --tags "tensorflow-gpu"
+
+# Deploys to local Kubernetes cluster (not implemented)
+ml-stack deploy --containers "tensorflow-gpu"
+
 ```
 
 ## Design

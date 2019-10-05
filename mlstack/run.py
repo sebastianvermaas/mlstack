@@ -134,7 +134,7 @@ class MLStack:
                 logger.info(stream.replace("\n", "")) if stream else None
                 logger.error(error.replace("\n", "")) if error else None
 
-    def apply(
+    def deploy(
         self, scripts_path: str = None, models_path: str = None, data_path: str = None
     ):
         """ Deploys MLStack to a local Kubernetes Cluster """
@@ -144,4 +144,6 @@ class MLStack:
             models_path = self.models_path
         if data_path is None:
             data_path = self.data_path
+
+        raise NotImplementedError()
 

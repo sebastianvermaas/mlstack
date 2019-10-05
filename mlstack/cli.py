@@ -11,7 +11,7 @@ def main():
     subparser_build.add_argument("-c", "--config", type=str, default=None)
     subparser_build.add_argument("-t", "--tags", default=None)
 
-    subparser_build = subparsers.add_parser("apply")
+    subparser_build = subparsers.add_parser("deploy")
 
     args = parser.parse_args()
 
