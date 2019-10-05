@@ -102,6 +102,9 @@ class MLStack:
             build_tags = self.build_tags
 
         for tag in build_tags:
+            if self.gpu:
+                tag = "-".join([tag, "gpu"])
+
             dockerfile_path = path.join(
                 getcwd()[: getcwd().index("ml-stack")],
                 "ml-stack/build",
@@ -125,3 +128,4 @@ class MLStack:
 
                 logger.info(stream.replace("\n", "")) if stream else None
                 logger.error(error.replace("\n", "")) if error else None
+
