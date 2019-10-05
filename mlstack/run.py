@@ -132,11 +132,10 @@ class MLStack:
             with open(dockerfile_path, "r") as dpath:
                 dockerfile = dpath.read()
 
-            logger.info(
-                "Building Docker image {tag} from {path}".format(
-                    tag=tag, path=dockerfile_path
-                )
+            message = "Building Docker image {tag} from {path}".format(
+                tag=tag, path=dockerfile_path
             )
+            logger.info(message)
 
             byte_stream = io.BytesIO(dockerfile.encode("utf-8"))
 
