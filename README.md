@@ -1,7 +1,7 @@
 # Machine Learning Stack
 ![release](https://img.shields.io/badge/release-v0.0.1-blue)
 ![Black Logo](https://img.shields.io/badge/code%20style-black-000000.svg)
-> Initial work! No promise on functionality or up to date documentation
+> *Initial work! No promise on functionality or up to date documentation*
 
 It is common for data scientists to be well equipped in languages and packages commonly used for statistical analysis and modelling. It is less common that data scientits are equipped to properly implement those models at a production level while adhering to software engineering principles.
 
