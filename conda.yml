@@ -5,6 +5,7 @@ dependencies:
 - pandas
 - scikit-learn
 - pyspark=2.4.3
+- pylint
 - jupyter
 - boto3
 - pip
