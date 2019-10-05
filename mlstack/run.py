@@ -74,9 +74,9 @@ class MLStack:
         Initializes a Kubernetes CoreV1Api object.
 
         Parameters
-          kube_config: Path to a Kubernetes config file.
-                       See `kubectl config set` for more
-                       information.
+          kube_config: Path to a Kubernetes config
+                       file. See `kubectl config set`
+                       for more information.
 
         Returns
           k8s_api: A KubeApi object
@@ -101,7 +101,7 @@ class MLStack:
         Initializes an AWS S3 BotoClient for S3 and DynamoDB.
 
         Parameters
-          service: Which AWS service to initialize a \
+          service: Which AWS service to initialize a
                    client for (i.e. `s3` or `dynamodb`)
 
         Returns
