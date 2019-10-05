@@ -9,3 +9,8 @@ dependencies:
   - scikit-learn
   - pyspark=2.4.3
   - jupyter
+  - pip
+  - pip:
+    - tensorflow-gpu==2.0
+    - awscli
+    - awscli-local
