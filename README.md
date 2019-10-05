@@ -11,7 +11,7 @@ sudo ./setup.sh
 ```
 
 ### Dependencies
-Initial versions assume that you have **Ubuntu 16.04** as your operating system. Later versions may include other operating systems, GPU/non-gpu support, and dynamic OS checks.
+Initial versions assume that you have **Ubuntu 18.04** as your operating system. Later versions may include other operating systems, GPU/non-gpu support, and dynamic OS checks.
 
 ## Design
 The design is in terms of the Kubernetes Pods. TODO: include Miniconda development with Jupyter and NVIDIA GPU support.
