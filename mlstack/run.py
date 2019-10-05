@@ -9,8 +9,9 @@ import boto3
 import docker
 import kubernetes
 from kubernetes.client import Configuration as KubeConfig
+from kubernetes.client import ExtensionsV1beta1Api as KubeExtensions
 from kubernetes.client.apis.core_v1_api import CoreV1Api as KubeApi
-
+from kubernetes.client.
 global logger
 
 FORMAT = "%(asctime)s - %(levelname)s mlstack.%(module)s.%(funcName)s - %(message)s"
@@ -133,7 +134,7 @@ class MLStack:
                 logger.info(stream.replace("\n", "")) if stream else None
                 logger.error(error.replace("\n", "")) if error else None
 
-    def deploy(
+    def apply(
         self, scripts_path: str = None, models_path: str = None, data_path: str = None
     ):
         """ Deploys MLStack to a local Kubernetes Cluster """
@@ -143,3 +144,4 @@ class MLStack:
             models_path = self.models_path
         if data_path is None:
             data_path = self.data_path
+
