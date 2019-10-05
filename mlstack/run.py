@@ -143,9 +143,15 @@ class MLStack:
                 stream = ast.literal_eval(line.decode("utf-8")).get("stream", None)
                 aux = ast.literal_eval(line.decode("utf-8")).get("aux", None)
                 error = ast.literal_eval(line.decode("utf-8")).get("error", None)
-                logger.info(stream.replace("\n", "")) if stream else None
-                logger.info(aux.replace("\n", "")) if stream else None
-                logger.error(error.replace("\n", "")) if error else None
+
+                if stream:
+                    logger.info(stream)
+                elif aux:
+                    logger.info(aux)
+                elif error:
+                    logger.error(error)
+                else:
+                    logger.warning("Include the key into this method")
 
     def deploy(
         self, scripts_path: str = None, models_path: str = None, data_path: str = None
