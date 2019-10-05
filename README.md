@@ -24,6 +24,7 @@ The design is in terms of the Kubernetes Pods. TODO: include Miniconda developme
     <img src='docs/design.png' height=300>
 </p>
 
+
 ### Components
 - [**Conda**](#conda): A minimal Anaconda environment for local development
 - [**Docker / Kubernetes**](#kubernetes): Base images and Pod executables
