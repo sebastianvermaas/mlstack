@@ -1,4 +1,8 @@
 # Machine Learning Stack
+![release](https://img.shields.io/badge/release-v0.0.1-blue)
+![Black Logo](https://img.shields.io/badge/code%20style-black-000000.svg)
+> Initial work! No promise on functionality or up to date documentation
+
 It is common for data scientists to be well equipped in languages and packages commonly used for statistical analysis and modelling. It is less common that data scientits are equipped to properly implement those models at a production level while adhering to software engineering principles.
 
 **ml-stack** provides a local development stack for data scientists that imitate production environments.
@@ -6,12 +10,13 @@ It is common for data scientists to be well equipped in languages and packages c
 ## Setup
 Initial versions assume an install of Ubuntu 16.04 LTS with an NVIDIA GPU.
 
+### Dependencies
+Initial versions assume that you have **Ubuntu 18.04** as your operating system. Later versions may include other operating systems, GPU/non-gpu support, and dynamic OS checks.
+
+
 ```sh
 sudo ./setup.sh
 ```
-
-### Dependencies
-Initial versions assume that you have **Ubuntu 18.04** as your operating system. Later versions may include other operating systems, GPU/non-gpu support, and dynamic OS checks.
 
 ## Design
 The design is in terms of the Kubernetes Pods. TODO: include Miniconda development with Jupyter and NVIDIA GPU support.
