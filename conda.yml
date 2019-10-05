@@ -1,16 +1,12 @@
-name: ds
-channels:
-  - defaults
-  - conda-forge
+channels: [defaults, conda-forge]
 dependencies:
-  - python=3.7.1
-  - numpy
-  - pandas
-  - scikit-learn
-  - pyspark=2.4.3
-  - jupyter
-  - pip
-  - pip:
-    - tensorflow-gpu==2.0
-    - awscli
-    - awscli-local
+- python=3.7.1
+- numpy
+- pandas
+- scikit-learn
+- pyspark=2.4.3
+- jupyter
+- boto3
+- pip
+- pip: [awscli, awscli-local, black, docker, kubernetes, tensorflow-gpu==2.0, pyyaml]
+name: ml

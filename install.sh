@@ -1,10 +1,11 @@
 #!/bin/bash
-echo "  __        __              __       "
-echo " /  )__/_  (  _ '_   _ _   ( _/_ _ / "
-echo "/(_/(//(/ __)( /(-/)( (-  __)/(/( /( "
+
+echo "        _      _           _     "
+echo "  _ __ | |  __| |_ __ _ __| |__  "
+echo " | '  \| | (_-<  _/ _  / _| / / "
+echo " |_|_|_|_| /__/\__\__,_\__|_\_\ "
 echo
-echo "Setting up your data science stack"
-echo
+echo "Welcome to Machine Learning Stack!"
 
 apt update
 apt upgrade -yy
