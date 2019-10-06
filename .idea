@@ -3,8 +3,7 @@ TODO:
 Update install.sh to
 - install Docker-CE 18.09
 - install kubectl, kubeadm, kubelet, and configure
-- install virtualbox
 - install weave
-- install minikube
-- start a local cluster
-- test deployments
+kubectl taint nodes --all node-role.kubernetes.io/master-
+
+

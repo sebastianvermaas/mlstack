@@ -9,7 +9,7 @@ RUN apt-get clean && \
 ARG VERSION=2.0
 ENV VERSION=$VERSION
 
-RUN pip install tensorflow==$VERSION
+#RUN pip install tensorflow==$VERSION
 
 RUN mkdir /opt/tensorflow
 RUN mkdir /opt/tensorflow/input
@@ -20,4 +20,4 @@ RUN mkdir /opt/tensorflow/input/data
 RUN mkdir /opt/tensorflow/input/scripts
 
 WORKDIR /opt/tensorflow/input
-ENTRYPOINT ["python", "model.py"]
+ENTRYPOINT sleep 1000

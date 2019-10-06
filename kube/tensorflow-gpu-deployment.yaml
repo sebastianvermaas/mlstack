@@ -17,5 +17,6 @@ spec:
       containers:
       - name: tensorflow-gpu
         image: tensorflow-gpu:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
