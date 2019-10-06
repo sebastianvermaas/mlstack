@@ -8,16 +8,9 @@ echo
 echo "Welcome to Machine Learning Stack!"
 
 apt update
-apt upgrade -yy
 apt autoremove -yy
 apt-get update && apt-get install -y apt-transport-https curl
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
-deb https://apt.kubernetes.io/ kubernetes-xenial main
-EOF
-apt-get update
-apt-get install -y kubelet kubeadm kubectl
-apt-mark hold kubelet kubeadm kubectl
+
 # Install Miniconda and ds conda environment
 echo "----------------------------"
 echo "Installing Miniconda"
@@ -39,7 +32,7 @@ echo "----------------------------"
 echo "Installing Docker"
 echo "----------------------------"
 
-if [ -x "$(command version docker)" ]
+if [ -x "$(command docker --version)" ]
 then
     apt install containerd docker.io -yy
     apt install docker-ce docker-ce-cli containerd.io -yy
@@ -47,19 +40,19 @@ else
     echo "Docker already installed!"
 fi
 
-echo "Pulling Docker images..."
-echo
-echo "**Pulling Tensorflow image**"
-docker pull tensorflow/tensorflow
-
-echo "**Pulling Tensorflow 2.0 image**"
-docker pull tensorflow/tensorflow
-
 # Install Kubernetes
 echo "---------------------------------"
-echo "Installing Docker and Kubernetes "
+echo "Installing Kubernetes "
 echo "---------------------------------"
-if [ -x "$(command version kubectl)" ]
+if [ -x "$(command kubectl version)" ]
+then
+    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+    cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+    deb https://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+    apt-get update
+    apt-get install -y kubelet kubeadm kubectl
+    apt-mark hold kubelet kubeadm kubectl
 else
     echo "Kubernetes already installed!"
 fi
