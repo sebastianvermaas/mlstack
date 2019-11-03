@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tensorflow-gpu
+  name: tensorflow
   labels:
-    app: tensorflow-gpu
+    app: tensorflow
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: tensorflow-gpu
+      app: tensorflow
   template:
     metadata:
       labels:
-        app: tensorflow-gpu
+        app: tensorflow
     spec:
       containers:
-      - name: tensorflow-gpu
-        image: tensorflow-gpu:latest
+      - name: tensorflow
+        image: tensorflow/tensorflow:latest-gpu
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80

@@ -1,4 +1,5 @@
-FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
+FROM tensorflow/tensorflow:latest
+
 RUN apt-get clean && \
     apt-get autoclean && \
     apt-get autoremove -yy && \

@@ -9,5 +9,5 @@ dependencies:
 - jupyter
 - boto3
 - pip
-- pip: [awscli, awscli-local, black, docker, kubernetes, tensorflow-gpu==2.0, pyyaml]
+- pip: [awscli, awscli-local, black, docker, kubernetes, tensorflow==2.0, pyyaml]
 name: ml
