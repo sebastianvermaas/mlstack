@@ -1,7 +1,7 @@
 # Machine Learning Stack
 ![release](https://img.shields.io/badge/release-v0.0.1-blue)
 ![Black Logo](https://img.shields.io/badge/code%20style-black-000000.svg)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 
 It is common for data scientists to be well equipped in languages and packages commonly used for statistical analysis and modeling. It is less common that data scientists are equipped to properly implement those models in production pipelines.
 
