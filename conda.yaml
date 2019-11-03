@@ -1,10 +1,11 @@
 channels: [defaults, conda-forge]
 dependencies:
 - python=3.7.1
+- mlflow
 - numpy
 - pandas
 - scikit-learn
-- pyspark=2.4.3
+- pyspark=2.4.4
 - pylint
 - jupyter
 - boto3
