@@ -16,8 +16,6 @@ It is common for data scientists to be well equipped in languages and packages c
 </p>
 
 <br>
-<br>
-
 
 ## Dependencies
 - Docker
