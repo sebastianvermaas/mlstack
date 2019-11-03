@@ -12,7 +12,7 @@ It is common for data scientists to be well equipped in languages and packages c
 The design is in terms of the Kubernetes Pods. TODO: include Miniconda development with Jupyter and NVIDIA GPU support.
 
 <p align="center">
-    <img src='docs/design.png' height=300>
+    <img src='docs/design.png' width=700>
 </p>
 
 
@@ -56,7 +56,7 @@ ml-stack deploy --containers "tensorflow-gpu"
 ```
 
 
-### installing on ubuntu 
+### installing on ubuntu
 ```
 then
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
@@ -68,7 +68,7 @@ EOF
     apt-mark hold kubelet kubeadm kubectl
 ```
 
-follow instructions for first apply and joining nodes. 
+follow instructions for first apply and joining nodes.
 ```
 kubectl taint nodes --all node-role.kubernetes.io/master-
 ```
