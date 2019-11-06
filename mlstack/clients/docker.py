@@ -16,6 +16,11 @@ class DockerClient(docker.APIClient):
     def build_images(self, images: list):
         """
         Builds Docker images from a Dockerfile.
+
+        Args
+          images: Images stored in mlstack/build/{image}, where the path
+                  is a Docker build context containing a Dockerfile
+
         """
         for image in images:
             # Returns mlstack/build/{image} (where mlstack is the install directory)
@@ -45,6 +50,10 @@ class DockerClient(docker.APIClient):
     def pull_images(self, repositories: list):
         """
         Pulls images from Docker repositories
+
+        Args
+          repositories: Docker repositories to pull from
+
         """
         ids = list()
         for repository in repositories:
