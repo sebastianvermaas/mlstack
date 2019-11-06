@@ -16,5 +16,8 @@ def main():
 
     args = parser.parse_args()
 
+    if not args.command:
+        parser.print_help()
+
     if args.command == "build":
         MLStack(args.config).dockerbuild(args.tags)
