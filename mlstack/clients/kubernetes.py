@@ -85,7 +85,7 @@ class KubernetesClient(KubeApi):
 
     def _delete_persistent_volumes(self, persistent_volumes: list):
         """
-        Deletes Persistent Volumes `ds-airflow-dags` and `ds-scripts`.
+        Deletes Persistent Volumes.
         Raises
           KubeApiException: If the persistent volume could not be deleted.
         """
