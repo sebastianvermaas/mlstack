@@ -50,12 +50,13 @@ class DockerClient(docker.APIClient):
         for repository in repositories:
             logger.info("Pulling from %s\n", repository)
             for i, line in enumerate(self.pull(repository, stream=True, decode=True)):
+                # Ideally there is a better way to do this
                 if line.get("id", None):
                     ids.append(line.get("id"))
                     ids = list(set(ids))
                 for id in ids:
                     if "." not in id:
-                        if line.get("progressDetail", None):
+                        if line.get("progress", None):
                             if i % 15 == 0:
                                 logger.info(
                                     "{id}: {status} {progress}".format(
