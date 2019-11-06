@@ -21,4 +21,3 @@ class KubernetesClient(KubeApi):
         KubeConfig.set_default(config)
         super().__init__()
 
-    def apply(self, )
