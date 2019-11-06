@@ -12,6 +12,7 @@ logger = logging.getLogger("mlstack")
 logger.setLevel(logging.INFO)
 logger.addHandler(HANDLER)
 
+
 def read_yaml(config_path: str = None):
     """
     Reads a configuration YAML.
