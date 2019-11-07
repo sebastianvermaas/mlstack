@@ -34,3 +34,11 @@ def read_yaml(config_path: str = None):
             "attributes from {file}".format(file=config_path)
             logger.error(message)
             raise yamlerror
+
+
+def install_dependencies():
+    spark_version = "2.4.4"
+    urls = [
+        "http://apache.mirror.anlx.net/spark/spark-{spark_version}/spark-"
+        "{spark_version}-bin-without-hadoop.tgz".format(spark_version=spark_version)
+    ]

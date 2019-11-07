@@ -48,7 +48,7 @@ class DockerClient(docker.APIClient):
 
             logger.info("Woohoo! Successfully built %s", image)
 
-    def pull_image(self, images: list):
+    def pull_images(self, images: list):
         """
         Pulls images from Docker repositories
 
@@ -59,7 +59,7 @@ class DockerClient(docker.APIClient):
         for image in images:
             logger.info("Pulling from %s\n", image)
             for line in self.pull(image, stream=True, decode=True):
-                if (bool(line.get("status", False))) & ("." not in line.get("id")):
+                if (bool(line.get("status", False))) & ("." not in line.get("id", "")):
                     sys.stdout.write(
                         "\r{id}: {status} {progress}".format(
                             id=line.get("id"),
