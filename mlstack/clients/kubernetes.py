@@ -1,6 +1,9 @@
+from pathlib import Path
+import glob
+import yaml
 import kubernetes
 from kubernetes.stream import stream
-from kubernetes.client import V1DeleteOptions
+from kubernetes.client import V1DeleteOptions, AppsV1Api
 from kubernetes.client import Configuration as KubeConfig
 from kubernetes.client.apis.core_v1_api import CoreV1Api as KubeApi
 from kubernetes.client.rest import ApiException as KubeApiException
@@ -14,15 +17,72 @@ class KubernetesClient(KubeApi):
     and applying manifests
     """
 
+    manifests_dir = str(
+        str(Path(__file__).absolute())
+        .replace(Path(__file__).name, "")
+        .replace("mlstack/clients", "manifests")
+    )
+
     def __init__(self):
         """ Initializes a KubernetesClient """
-        kubernetes.config.load_kube_config(kube_config)
+        kubernetes.config.load_kube_config()
         config = KubeConfig()
         config.assert_hostname = False
         KubeConfig.set_default(config)
         super().__init__()
 
-    def create_persistent_volumes(self, pv_config: dict):
+    def create_namespaced_deployments(self, components: list):
+        """
+        Creates Kubernetes deployments.
+        Equivalent to `kubectl create -f deploy.yaml`
+
+        Args
+          components: A list of mlstack components
+
+        """
+        for component in components:
+            for file in glob.glob(str(Path(self.manifests_dir, component)) + "/*.yaml"):
+                if file.split("/")[-1].startswith("deploy"):
+                    logger.info("Reading deployment manifest from %s", file)
+                    body = read_yaml(file)
+                    try:
+                        AppsV1Api().create_namespaced_deployment(
+                            namespace="default", body=body
+                        )
+                        logger.info("Deployment `%s` created", component)
+
+                    except KubeApiException:
+                        logger.error(
+                            "\n\nCannot create deployment `%s` as it already exists.\n"
+                            "Use `mlstack close <component>` if you want to recreate "
+                            "the deployment\n",
+                            component,
+                        )
+
+    def delete_namespaced_deployments(self, components: list):
+        """
+        Deletes Kubernetes deployments.
+        Equivalent to `kubectl delete -f deploy.yaml`
+
+        Args
+          components: A list of mlstack components
+
+        """
+        for component in components:
+            for file in glob.glob(str(Path(self.manifests_dir, component)) + "/*.yaml"):
+                if file.split("/")[-1].startswith("deploy"):
+                    try:
+                        AppsV1Api().delete_namespaced_deployment(
+                            name=component, namespace="default", body=V1DeleteOptions()
+                        )
+                        logger.info("Deployment `%s` deleted", component)
+                    except KubeApiException:
+                        logger.error(
+                            "\n\nCannot delete deployment `%s` as it does not exist.\n",
+                            component,
+                        )
+
+    def create_persistent_volumes(self, components: list):
         """
         Creates Kubernetes persistent volumes. Checks if the persistent
         volumes already exist. If they do, no persistent volumes are created.
@@ -68,12 +128,12 @@ class KubernetesClient(KubeApi):
 
             persistent_volume_body = json.loads(
                 pv_template.format(
-                    name=persistent_volume, host_path=host_path, storage=storage,
+                    name=persistent_volume, host_path=host_path, storage=storage
                 )
             )
             if persistent_volume in existing:
                 logger.warning(
-                    "Persistent Volume `%s` already exists.", persistent_volume,
+                    "Persistent Volume `%s` already exists.", persistent_volume
                 )
             else:
                 logger.info(

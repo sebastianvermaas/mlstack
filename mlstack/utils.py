@@ -1,4 +1,5 @@
 """ Submodule for defining general utility functions """
+import yaml
 import binascii
 import hashlib
 import logging
@@ -24,7 +25,6 @@ def read_yaml(config_path: str = None):
     if not config_path:
         return {}
 
-    logger.info("Reading configuration from %s", config_path)
     with open(config_path, "r") as stream:
         try:
             config = yaml.safe_load(stream)

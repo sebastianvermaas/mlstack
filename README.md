@@ -37,6 +37,10 @@ MLStack can be installed with the following. Note that the setup will take some 
 git clone https://github.com/sebastianvermaas/mlstack.git
 cd mlstack
 
+# Create your mlstack conda environment
+conda env create -f conda.yml
+conda activate mlstack
+
 # Install the Python library and CLI
 pip install -e .
 

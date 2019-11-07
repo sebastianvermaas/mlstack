@@ -1,5 +1,4 @@
 """ Defines a DockerClient class for building and pulling images """
-import tqdm
 from pathlib import Path
 
 import docker
@@ -63,14 +62,12 @@ class DockerClient(docker.APIClient):
                 if line.get("id", None):
                     ids.append(line.get("id"))
                     ids = list(set(ids))
-                for id in ids:
-                    if "." not in id:
-                        if line.get("progress", None):
-                            if i % 15 == 0:
-                                logger.info(
-                                    "{id}: {status} {progress}".format(
-                                        id=id,
-                                        status=line.get("status"),
-                                        progress=line.get("progress"),
-                                    )
-                                )
+                for id_ in ids:
+                    if ("." not in id_) & (line.get("progress", None)):
+                        if i % 15 == 0:
+                            message = "{id}: {status} {progress}".format(
+                                id=id_,
+                                status=line.get("status"),
+                                progress=line.get("progress"),
+                            )
+                            logger.info(message)
