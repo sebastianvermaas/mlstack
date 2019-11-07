@@ -31,133 +31,143 @@ class KubernetesClient(KubeApi):
         KubeConfig.set_default(config)
         super().__init__()
 
-    def create_namespaced_deployments(self, components: list):
+    def create_manifest(self, components: list):
         """
-        Creates Kubernetes deployments.
-        Equivalent to `kubectl create -f deploy.yaml`
+        Creates a manifest from a list of components
+        located in mlstack/manifests. Uses a clever
+        getattr() trick to avoid hardcoding everything.
+
+        Will create kubernetes apps in the following order:
+
+         - Persistent Volume Claim
+         - Persistent Volume
+         - Config Map
+         - Deployment
+         - Secret
+         - Service
 
         Args
-          components: A list of mlstack components
+          components: A list of mlstack component manifests to create.
 
         """
         for component in components:
-            for file in glob.glob(str(Path(self.manifests_dir, component)) + "/*.yaml"):
-                if file.split("/")[-1].startswith("deploy"):
-                    logger.info("Reading deployment manifest from %s", file)
-                    body = read_yaml(file)
-                    try:
-                        AppsV1Api().create_namespaced_deployment(
-                            namespace="default", body=body
-                        )
-                        logger.info("Deployment `%s` created", component)
+            for app in [
+                "persistent_volume_claim",
+                "persist_volume",
+                "config_map",
+                "deployment",
+                "secret",
+                "service",
+            ]:
+                for file in glob.glob(
+                    str(Path(self.manifests_dir, component)) + "/*.yaml"
+                ):
+                    mask = file.split("/")[-1].startswith(app.replace("_", "-"))
+                    if Path(file).exists() & mask:
+                        logger.info("Reading manifest from %s", file)
+                        body = read_yaml(file)
+                        name = body.get("metadata").get("name")
 
-                    except KubeApiException:
-                        logger.error(
-                            "\n\nCannot create deployment `%s` as it already exists.\n"
-                            "Use `mlstack close <component>` if you want to recreate "
-                            "the deployment\n",
-                            component,
+                        method = "create_namespaced_{app}".format(app=app)
+
+                        try:
+                            if app in [
+                                "persistent_volume_claim",
+                                "config_map",
+                                "service",
+                                "secret",
+                            ]:
+
+                                getattr(self, method)(namespace="default", body=body)
+                            if app in ["persistent_volume"]:
+                                getattr(self, "create_persistent_volume")(body=body)
+                            if app in ["deployment"]:
+                                AppsV1Api().create_namespaced_deployment(
+                                    namespace="default", body=body
+                                )
+                        except KubeApiException:
+                            logger.error(
+                                "\n\nCannot create %s `%s` as it already exists.\n"
+                                "Use `mlstack close <component>` if you want to recreate "
+                                "the deployment\n",
+                                "".join([a.capitalize() for a in app.split("_")]),
+                                component,
+                            )
+
+                        logger.info(
+                            "%s `%s` created",
+                            "".join([a.capitalize() for a in app.split("_")]),
+                            name,
                         )
 
-    def delete_namespaced_deployments(self, components: list):
+    def delete_manifest(self, components: list):
         """
-        Deletes Kubernetes deployments.
-        Equivalent to `kubectl delete -f deploy.yaml`
+        Deletes a manifest from a list of components
+        located in mlstack/manifests. Uses a clever
+        getattr() trick to avoid hardcoding everything.
+
+        Will delete kubernetes apps in the following order:
+
+         - Persistent Volume Claim
+         - Persistent Volume
+         - Config Map
+         - Deployment
+         - Secret
+         - Service
 
         Args
-          components: A list of mlstack components
+          components: A list of mlstack component manifests to create.
 
         """
         for component in components:
-            for file in glob.glob(str(Path(self.manifests_dir, component)) + "/*.yaml"):
-                if file.split("/")[-1].startswith("deploy"):
-                    try:
-                        AppsV1Api().delete_namespaced_deployment(
-                            name=component, namespace="default", body=V1DeleteOptions()
-                        )
-                        logger.info("Deployment `%s` deleted", component)
-                    except KubeApiException:
-                        logger.error(
-                            "\n\nCannot delete deployment `%s` as it does not exist.\n",
-                            component,
-                        )
+            for app in [
+                "persistent_volume_claim",
+                "persist_volume",
+                "config_map",
+                "deployment",
+                "secret",
+                "service",
+            ]:
+                for file in glob.glob(
+                    str(Path(self.manifests_dir, component)) + "/*.yaml"
+                ):
+                    mask = file.split("/")[-1].startswith(app.replace("_", "-"))
+                    if Path(file).exists() & mask:
+                        logger.info("Reading manifest from %s", file)
+                        body = read_yaml(file)
+                        name = body.get("metadata").get("name")
 
-    def create_persistent_volumes(self, components: list):
-        """
-        Creates Kubernetes persistent volumes. Checks if the persistent
-        volumes already exist. If they do, no persistent volumes are created.
-        If they do not, the persistent volumes are created based on a template.
+                        method = "delete_namespaced_{app}".format(app=app)
+                        try:
 
-        Args
-          pv_map: Dictionary containing a key for the name of the persistent volume,
-          		  along with associated storage and hostPath tags.
+                            if app in [
+                                "persistent_volume_claim",
+                                "config_map",
+                                "service",
+                                "secret",
+                            ]:
+                                getattr(self, method)(
+                                    namespace="default",
+                                    name=name,
+                                    body=V1DeleteOptions(),
+                                )
+                            if app in ["persistent_volume"]:
+                                getattr(self, "create_persistent_volume")(
+                                    body=V1DeleteOptions()
+                                )
+                            if app in ["deployment"]:
+                                AppsV1Api().delete_namespaced_deployment(
+                                    namespace="default",
+                                    name=name,
+                                    body=V1DeleteOptions(),
+                                )
 
-        """
-        # Find out if the persistent volumes already exist
-        existing = [
-            items.metadata.name
-            for items in self.list_persistent_volume().__dict__.get("_items")
-        ]
-
-        pv_template = """
-        {{
-            "kind": "PersistentVolume",
-            "apiVersion": "v1",
-            "metadata": {{
-                "name": "{name}"
-            }},
-            "spec": {{
-                "storageClassName": "manual",
-                "capacity": {{
-                    "storage": "{storage}"
-                }},
-                "accessModes": [
-                    "ReadWriteMany"
-                ],
-                "hostPath": {{
-                    "path": "{host_path}"
-                }}
-            }}
-        }}
-        """
-        persistent_volumes = pv_map.keys()
-        for persistent_volume in persistent_volumes:
-            # Specify kubernetes persistent volume body configuration
-            storage = pv_map.get(persistent_volume).get("storage")
-            host_path = pv_map.get(persistent_volume).get("hostPath")
-
-            persistent_volume_body = json.loads(
-                pv_template.format(
-                    name=persistent_volume, host_path=host_path, storage=storage
-                )
-            )
-            if persistent_volume in existing:
-                logger.warning(
-                    "Persistent Volume `%s` already exists.", persistent_volume
-                )
-            else:
-                logger.info(
-                    "Creating Persistent Volume `%s` with body\n\n%s\n",
-                    persistent_volume,
-                    pformat(persistent_volume_body),
-                )
-                self.create_persistent_volume(body=persistent_volume_body, pretty=True)
-
-    def _delete_persistent_volumes(self, persistent_volumes: list):
-        """
-        Deletes Persistent Volumes.
-        Raises
-          KubeApiException: If the persistent volume could not be deleted.
-        """
-        logger.info("Deleting persistent volumes %s", persistent_volumes)
-        body = V1DeleteOptions()
-        for persistent_volume in persistent_volumes:
-            try:
-                self.delete_persistent_volume(name=persistent_volume, body=body)
-                logger.info("Deleted persistent volume `%s`", persistent_volume)
-            except KubeApiException as err:
-                logger.error(
-                    "Exception when calling CoreV1Api "
-                    "delete_persistent_volume: %s\n",
-                    err,
-                )
+                            logger.info(
+                                "%s `%s` deleted",
+                                "".join([a.capitalize() for a in app.split("_")]),
+                                name,
+                            )
+                        except KubeApiException:
+                            logger.error(
+                                "\n\nCannot delete %s `%s` as it does not exists.\n"
+                            )
