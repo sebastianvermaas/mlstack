@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,7 +17,7 @@ spec:
       hostname: localstack
       containers:
       - name: localstack
-        image: localstack/localstack:latest
+        image: localstack/localstack:0.8.6
         imagePullPolicy: IfNotPresent
         env:
         - name: SERVICES
@@ -39,3 +38,35 @@ spec:
       volumes:
       - name: data
         emptyDir: {}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: localstack-gui
+spec:
+  type: NodePort
+  selector:
+    app: localstack
+  ports:
+  - name: gui
+    protocol: TCP
+    port: 8080
+    nodePort: 30079
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: localstack
+spec:
+  type: NodePort
+  selector:
+    app: localstack
+  ports:
+  - name: s3
+    protocol: TCP
+    port: 4572
+    nodePort: 30572
+  - name: dynamodb
+    protocol: TCP
+    port: 4569
+    nodePort: 30569

@@ -25,13 +25,14 @@ def read_yaml(config_path: str = None):
     if not config_path:
         return {}
 
-    with open(config_path, "r") as stream:
+    with open(config_path) as stream:
         try:
-            config = yaml.safe_load(stream)
+            return list(yaml.load_all(stream))
+
         except yaml.YAMLError as yamlerror:
             message = "Could not read and/or set "
             "attributes from {file}".format(file=config_path)
             logger.error(message)
             raise yamlerror
 
-    return config
+
