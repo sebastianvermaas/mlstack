@@ -1,23 +1,21 @@
 """ CLI for ml-stack """
 
 import argparse
-from mlstack.run import MLStack
+from mlstack.main import MLStack
 
 
 def main():
     """ Main entrypoint for `ml-stack` CLI """
     parser = argparse.ArgumentParser(description="")
     subparsers = parser.add_subparsers(dest="command")
-    subparser_build = subparsers.add_parser("build")
-    subparser_build.add_argument("-c", "--config", type=str, default=None)
-    subparser_build.add_argument("-t", "--tags", default=None)
 
-    subparser_build = subparsers.add_parser("deploy")
-
+    setup = subparsers.add_parser("setup")
     args = parser.parse_args()
 
     if not args.command:
         parser.print_help()
 
-    if args.command == "build":
-        MLStack(args.config).dockerbuild(args.tags)
+    if args.command == "setup":
+        MLStack().setup(
+            images=["tensorflow/tensorflow", "pytorch/pytorch", "localstack/localstack"]
+        )

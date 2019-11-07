@@ -111,7 +111,7 @@ class KubernetesClient(KubeApi):
 
                     except KubeApiException:
                         logger.error(
-                            "\n\nCannot create %s `%s` as it already exists.\n"
+                            "Cannot create %s `%s` as it already exists.\n"
                             "Use `mlstack close `%s` if you want to recreate "
                             "the deployment\n",
                             kind,

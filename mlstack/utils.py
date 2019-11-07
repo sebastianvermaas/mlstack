@@ -34,5 +34,3 @@ def read_yaml(config_path: str = None):
             "attributes from {file}".format(file=config_path)
             logger.error(message)
             raise yamlerror
-
-

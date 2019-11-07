@@ -1,4 +1,6 @@
 """ Defines a DockerClient class for building and pulling images """
+
+import sys
 from pathlib import Path
 
 import docker
@@ -46,7 +48,7 @@ class DockerClient(docker.APIClient):
 
             logger.info("Woohoo! Successfully built %s", image)
 
-    def pull_images(self, repositories: list):
+    def pull_image(self, images: list):
         """
         Pulls images from Docker repositories
 
@@ -54,20 +56,15 @@ class DockerClient(docker.APIClient):
           repositories: Docker repositories to pull from
 
         """
-        ids = list()
-        for repository in repositories:
-            logger.info("Pulling from %s\n", repository)
-            for i, line in enumerate(self.pull(repository, stream=True, decode=True)):
-                # Ideally there is a better way to do this
-                if line.get("id", None):
-                    ids.append(line.get("id"))
-                    ids = list(set(ids))
-                for id_ in ids:
-                    if ("." not in id_) & (line.get("progress", None)):
-                        if i % 15 == 0:
-                            message = "{id}: {status} {progress}".format(
-                                id=id_,
-                                status=line.get("status"),
-                                progress=line.get("progress"),
-                            )
-                            logger.info(message)
+        for image in images:
+            logger.info("Pulling from %s\n", image)
+            for line in self.pull(image, stream=True, decode=True):
+                if (bool(line.get("status", False))) & ("." not in line.get("id")):
+                    sys.stdout.write(
+                        "\r{id}: {status} {progress}".format(
+                            id=line.get("id"),
+                            status=line.get("status"),
+                            progress=line.get("progress"),
+                        )
+                    )
+                    sys.stdout.flush()
