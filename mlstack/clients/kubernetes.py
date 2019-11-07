@@ -1,8 +1,8 @@
+""" Defines a DockerClient class for creating and deleting manifests """
 from pathlib import Path
 import glob
-import yaml
+
 import kubernetes
-from kubernetes.stream import stream
 from kubernetes.client import V1DeleteOptions, AppsV1Api
 from kubernetes.client import Configuration as KubeConfig
 from kubernetes.client.apis.core_v1_api import CoreV1Api as KubeApi
