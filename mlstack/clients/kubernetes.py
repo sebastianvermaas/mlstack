@@ -1,6 +1,7 @@
 """ Defines a DockerClient class for creating and deleting manifests """
 from pathlib import Path
 import glob
+import re
 
 import kubernetes
 from kubernetes.client import V1DeleteOptions, AppsV1Api
@@ -23,15 +24,6 @@ class KubernetesClient(KubeApi):
         .replace("mlstack/clients", "manifests")
     )
 
-    apps = [
-        "persistent_volume_claim",
-        "persist_volume",
-        "config_map",
-        "deployment",
-        "secret",
-        "service",
-    ]
-
     def __init__(self):
         """ Initializes a KubernetesClient """
         kubernetes.config.load_kube_config()
@@ -46,6 +38,8 @@ class KubernetesClient(KubeApi):
             self.create_manifest(component=component)
 
     def delete_manifests(self, components: list):
+        """ Deletes Kubernetes manifests """
+
         for component in components:
             self.delete_manifest(component=component)
 
@@ -57,9 +51,9 @@ class KubernetesClient(KubeApi):
 
         Will create kubernetes apps in the following order:
 
-         - Persistent Volume Claim
-         - Persistent Volume
-         - Config Map
+         - PersistentVolumeClaim
+         - PersistentVolume
+         - ConfigMap
          - Deployment
          - Secret
          - Service
@@ -68,44 +62,60 @@ class KubernetesClient(KubeApi):
           components: A list of mlstack component manifests to create.
 
         """
-        for app in self.apps:
-            for file in glob.glob(str(Path(self.manifests_dir, component)) + "/*.yaml"):
-                mask = file.split("/")[-1].startswith(app.replace("_", "-"))
-                if Path(file).exists() & mask:
-                    logger.info("Reading manifest from %s\n", file)
-                    body = read_yaml(file)
-                    name = body.get("metadata").get("name")
+        for file in glob.glob(str(Path(self.manifests_dir, component)) + "/*.yaml"):
+            body = read_yaml(file)
+            kind = body.get("kind")
+            name = body.get("metadata").get("name")
+            method_ext = "_".join(
+                val.lower() for val in re.findall("[A-Z][^A-Z]*", kind)
+            )
 
-                    method = "create_namespaced_{app}".format(app=app)
+            if kind in ["PersistentVolumeClaim", "ConfigMap", "Service", "Secret"]:
+                try:
+                    method = "create_namespaced_{ext}".format(ext=method_ext)
+                    getattr(self, method)(namespace="default", body=body)
+                    logger.info("%s `%s` created", kind, name)
 
-                    try:
-                        if app in [
-                            "persistent_volume_claim",
-                            "config_map",
-                            "service",
-                            "secret",
-                        ]:
-
-                            getattr(self, method)(namespace="default", body=body)
-                        if app in ["persistent_volume"]:
-                            getattr(self, "create_persistent_volume")(body=body)
-                        if app in ["deployment"]:
-                            AppsV1Api().create_namespaced_deployment(
-                                namespace="default", body=body
-                            )
-                    except KubeApiException:
-                        logger.error(
-                            "\n\nCannot create %s `%s` as it already exists.\n"
-                            "Use `mlstack close <component>` if you want to recreate "
-                            "the deployment\n",
-                            "".join([a.capitalize() for a in app.split("_")]),
-                            component,
-                        )
-
-                    logger.info(
-                        "%s `%s` created",
-                        "".join([a.capitalize() for a in app.split("_")]),
+                except KubeApiException:
+                    logger.error(
+                        "\n\nCannot create %s `%s` as it already exists.\n"
+                        "Use `mlstack close `%s` if you want to recreate "
+                        "the deployment\n",
+                        kind,
                         name,
+                        component,
+                    )
+
+            if kind in ["PersistentVolume"]:
+                try:
+                    getattr(self, "create_persistent_volume")(body=body)
+                    logger.info("%s `%s` created", kind, name)
+
+                except KubeApiException:
+                    logger.error(
+                        "\n\nCannot create %s `%s` as it already exists.\n"
+                        "Use `mlstack close `%s` if you want to recreate "
+                        "the deployment\n",
+                        kind,
+                        name,
+                        component,
+                    )
+            if kind in ["Deployment"]:
+                try:
+
+                    AppsV1Api().create_namespaced_deployment(
+                        namespace="default", body=body
+                    )
+                    logger.info("%s `%s` created", kind, name)
+
+                except KubeApiException:
+                    logger.error(
+                        "\n\nCannot create %s `%s` as it already exists.\n"
+                        "Use `mlstack close `%s` if you want to recreate "
+                        "the deployment\n",
+                        kind,
+                        name,
+                        component,
                     )
 
     def delete_manifest(self, component: str):
@@ -114,11 +124,11 @@ class KubernetesClient(KubeApi):
         located in mlstack/manifests. Uses a clever
         getattr() trick to avoid hardcoding everything.
 
-        Will delete kubernetes apps in the following order:
+        Will create kubernetes apps in the following order:
 
-         - Persistent Volume Claim
-         - Persistent Volume
-         - Config Map
+         - PersistentVolumeClaim
+         - PersistentVolume
+         - ConfigMap
          - Deployment
          - Secret
          - Service
@@ -127,43 +137,47 @@ class KubernetesClient(KubeApi):
           components: A list of mlstack component manifests to create.
 
         """
-        for app in self.apps:
-            for file in glob.glob(str(Path(self.manifests_dir, component)) + "/*.yaml"):
-                mask = file.split("/")[-1].startswith(app.replace("_", "-"))
-                if Path(file).exists() & mask:
-                    logger.info("Reading manifest from %s\n", file)
-                    body = read_yaml(file)
-                    name = body.get("metadata").get("name")
+        for file in glob.glob(str(Path(self.manifests_dir, component)) + "/*.yaml"):
+            body = read_yaml(file)
+            kind = body.get("kind")
+            name = body.get("metadata").get("name")
+            method_ext = "_".join(
+                val.lower() for val in re.findall("[A-Z][^A-Z]*", kind)
+            )
 
-                    method = "delete_namespaced_{app}".format(app=app)
-                    try:
+            if kind in ["PersistentVolumeClaim", "ConfigMap", "Service", "Secret"]:
+                try:
+                    method = "delete_namespaced_{ext}".format(ext=method_ext)
+                    getattr(self, method)(
+                        namespace="default", name=name, body=V1DeleteOptions()
+                    )
+                    logger.info("%s `%s` deleted", kind, name)
 
-                        if app in [
-                            "persistent_volume_claim",
-                            "config_map",
-                            "service",
-                            "secret",
-                        ]:
-                            getattr(self, method)(
-                                namespace="default", name=name, body=V1DeleteOptions()
-                            )
-                        if app in ["persistent_volume"]:
-                            getattr(self, "delete_persistent_volume")(
-                                name=name, body=V1DeleteOptions()
-                            )
-                        if app in ["deployment"]:
-                            AppsV1Api().delete_namespaced_deployment(
-                                namespace="default", name=name, body=V1DeleteOptions()
-                            )
+                except KubeApiException:
+                    logger.error(
+                        "Cannot delete %s `%s` as it already exists.", kind, name
+                    )
 
-                        logger.info(
-                            "%s `%s` deleted",
-                            "".join([a.capitalize() for a in app.split("_")]),
-                            name,
-                        )
-                    except KubeApiException:
-                        logger.error(
-                            "\n\nCannot delete %s `%s` as it does not exists.\n",
-                            "".join([a.capitalize() for a in app.split("_")]),
-                            name,
-                        )
+            if kind in ["PersistentVolume"]:
+                try:
+                    getattr(self, "delete_persistent_volume")(
+                        name=name, body=V1DeleteOptions()
+                    )
+                    logger.info("%s `%s` deleted", kind, name)
+
+                except KubeApiException:
+                    logger.error(
+                        "Cannot delete %s `%s` as it already exists.", kind, name
+                    )
+
+            if kind in ["Deployment"]:
+                try:
+                    AppsV1Api().delete_namespaced_deployment(
+                        namespace="default", name=name, body=V1DeleteOptions()
+                    )
+                    logger.info("%s `%s` deleted", kind, name)
+
+                except KubeApiException:
+                    logger.error(
+                        "Cannot delete %s `%s` as it already exists.", kind, name
+                    )

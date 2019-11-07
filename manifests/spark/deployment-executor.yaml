@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-executor
+  labels:
+    app: spark
+    role: executor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark
+      role: executor
+  template:
+    metadata:
+      labels:
+        app: spark
+        role: executor
+    spec:
+      hostname: spark-executor
+      containers:
+      - name: spark-executor
+        image: spark:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: SPARK_ROLE
+          value: slave
+        - name: SPARK_MASTER_HOST
+          value: spark-master
+        - name: SPARK_MASTER_PORT
+          value: '7077'
+        - name: AWS_ACCESS_KEY_ID
+          value: foo
+        - name: AWS_SECRET_ACCESS_KEY
+          value: bar
+        volumeMounts:
+        # Spark configuration
+        - mountPath: /opt/spark/conf/log4j.properties
+          name: spark-config
+          subPath: log4j.properties
+        - mountPath: /opt/spark/conf/hive-site.xml
+          name: spark-config
+          subPath: hive-site.xml
+        - mountPath: /opt/spark/conf/spark-defaults.conf
+          name: spark-config
+          subPath: spark-defaults.conf
+      volumes:
+      # Spark settings volume
+      - name: spark-config
+        configMap:
+          name: spark

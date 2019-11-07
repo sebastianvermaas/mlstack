@@ -1,0 +1,81 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-edge
+  labels:
+    app: spark
+    role: edge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark
+      role: edge
+  template:
+    metadata:
+      labels:
+        app: spark
+        role: edge
+    spec:
+      hostname: spark-edge
+      initContainers:
+      - name: init-deps
+        image: spark:latest
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 0
+        env:
+        - name: SPARK_ROLE
+          value: edge
+        volumeMounts:
+        # Spark config files
+        - mountPath: /opt/spark/conf/spark-defaults.conf
+          name: spark-config
+          subPath: spark-defaults.conf
+        - mountPath: /opt/spark/.ivy2
+          name: cache
+        command:
+          - '/tmp/init-deps.sh'
+      containers:
+      - name: spark-edge
+        image: spark:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: SPARK_ROLE
+          value: edge
+        - name: SPARK_MASTER_HOST
+          value: spark-master
+        - name: SPARK_MASTER_PORT
+          value: '7077'
+        - name: SPARK_LOCAL_IP
+          value: spark-edge
+        - name: AWS_ACCESS_KEY_ID
+          value: foo
+        - name: AWS_SECRET_ACCESS_KEY
+          value: bar
+        ports:
+        - containerPort: 31000
+        - containerPort: 31001
+        volumeMounts:
+        # Spark config files
+        - mountPath: /opt/spark/conf/log4j.properties
+          name: spark-config
+          subPath: log4j.properties
+        - mountPath: /opt/spark/conf/hive-site.xml
+          name: spark-config
+          subPath: hive-site.xml
+        - mountPath: /opt/spark/conf/spark-defaults.conf
+          name: spark-config
+          subPath: spark-defaults.conf
+        - mountPath: /opt/spark/input
+          name: input
+        - mountPath: /opt/spark/.ivy2
+          name: cache
+        - name: jobs
+          mountPath: /opt/spark/jobs
+      volumes:
+      # Spark settings volume
+      - name: spark-config
+        configMap:
+          name: spark
