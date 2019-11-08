@@ -19,24 +19,6 @@ spec:
         role: edge
     spec:
       hostname: spark-edge
-      initContainers:
-      - name: init-deps
-        image: spark:latest
-        imagePullPolicy: IfNotPresent
-        securityContext:
-          runAsUser: 0
-        env:
-        - name: SPARK_ROLE
-          value: edge
-        volumeMounts:
-        # Spark config files
-        - mountPath: /opt/spark/conf/spark-defaults.conf
-          name: spark-config
-          subPath: spark-defaults.conf
-        - mountPath: /opt/spark/.ivy2
-          name: cache
-        command:
-          - '/tmp/init-deps.sh'
       containers:
       - name: spark-edge
         image: spark:latest
@@ -68,14 +50,11 @@ spec:
         - mountPath: /opt/spark/conf/spark-defaults.conf
           name: spark-config
           subPath: spark-defaults.conf
-        - mountPath: /opt/spark/input
-          name: input
-        - mountPath: /opt/spark/.ivy2
-          name: cache
-        - name: jobs
-          mountPath: /opt/spark/jobs
       volumes:
       # Spark settings volume
       - name: spark-config
         configMap:
           name: spark
+      - name: cache
+        persistentVolumeClaim:
+          claimName: spark-cache
