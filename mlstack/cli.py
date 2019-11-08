@@ -10,6 +10,9 @@ def main():
     subparsers = parser.add_subparsers(dest="command")
 
     setup = subparsers.add_parser("setup")
+    create = subparsers.add_parser("create")
+    close = subparsers.add_parser("close")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -17,3 +20,9 @@ def main():
 
     if args.command == "setup":
         MLStack().setup()
+
+    if args.command == "create":
+        MLStack().create()
+
+    if args.command == "close":
+        MLStack().close()

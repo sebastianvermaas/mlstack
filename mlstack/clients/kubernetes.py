@@ -65,59 +65,52 @@ class KubernetesClient(KubeApi):
         for file in glob.glob(str(Path(self.manifests_dir, component)) + "/*.yaml"):
             generator = read_yaml(file)
             for body in generator:
-                kind = body.get("kind")
-                name = body.get("metadata").get("name")
-                method_ext = "_".join(
-                    val.lower() for val in re.findall("[A-Z][^A-Z]*", kind)
-                )
-
-                if kind in ["PersistentVolumeClaim", "ConfigMap", "Service", "Secret"]:
-                    try:
-                        method = "create_namespaced_{ext}".format(ext=method_ext)
-                        getattr(self, method)(namespace="default", body=body)
-                        logger.info("%s `%s` created", kind, name)
-
-                    except KubeApiException:
-                        logger.error(
-                            "\n\nCannot create %s `%s` as it already exists.\n"
-                            "Use `mlstack close `%s` if you want to recreate "
-                            "the deployment\n",
-                            kind,
-                            name,
-                            component,
+                if body:
+                    kind = body.get("kind")
+                    name = body.get("metadata").get("name")
+                    method_ext = "_".join(
+                        val.lower() for val in re.findall("[A-Z][^A-Z]*", kind)
+                    )
+                    warning_message = (
+                        "Cannot create {kind} `{name}` as it already exists.\n"
+                        "Use `mlstack close `{component}` if you want to recreate "
+                        "the deployment\n".format(
+                            kind=kind, name=name, component=component
                         )
+                    )
+                    if kind in [
+                        "PersistentVolumeClaim",
+                        "ConfigMap",
+                        "Service",
+                        "Secret",
+                    ]:
 
-                if kind in ["PersistentVolume"]:
-                    try:
-                        getattr(self, "create_persistent_volume")(body=body)
-                        logger.info("%s `%s` created", kind, name)
+                        try:
+                            method = "create_namespaced_{ext}".format(ext=method_ext)
+                            getattr(self, method)(namespace="default", body=body)
+                            logger.info("%s `%s` created", kind, name)
 
-                    except KubeApiException:
-                        logger.error(
-                            "\n\nCannot create %s `%s` as it already exists.\n"
-                            "Use `mlstack close `%s` if you want to recreate "
-                            "the deployment\n",
-                            kind,
-                            name,
-                            component,
-                        )
-                if kind in ["Deployment"]:
-                    try:
+                        except KubeApiException:
+                            logger.warning(warning_message)
 
-                        AppsV1Api().create_namespaced_deployment(
-                            namespace="default", body=body
-                        )
-                        logger.info("%s `%s` created", kind, name)
+                    if kind in ["PersistentVolume"]:
+                        try:
+                            getattr(self, "create_persistent_volume")(body=body)
+                            logger.info("%s `%s` created", kind, name)
 
-                    except KubeApiException:
-                        logger.error(
-                            "Cannot create %s `%s` as it already exists.\n"
-                            "Use `mlstack close `%s` if you want to recreate "
-                            "the deployment\n",
-                            kind,
-                            name,
-                            component,
-                        )
+                        except KubeApiException:
+                            logger.warning(warning_message)
+
+                    if kind in ["Deployment"]:
+                        try:
+
+                            AppsV1Api().create_namespaced_deployment(
+                                namespace="default", body=body
+                            )
+                            logger.info("%s `%s` created", kind, name)
+
+                        except KubeApiException:
+                            logger.warning(warning_message)
 
     def delete_manifest(self, component: str):
         """
@@ -141,45 +134,48 @@ class KubernetesClient(KubeApi):
         for file in glob.glob(str(Path(self.manifests_dir, component)) + "/*.yaml"):
             generator = read_yaml(file)
             for body in generator:
-                kind = body.get("kind")
-                name = body.get("metadata").get("name")
-                method_ext = "_".join(
-                    val.lower() for val in re.findall("[A-Z][^A-Z]*", kind)
-                )
+                if body:
+                    kind = body.get("kind")
+                    name = body.get("metadata").get("name")
+                    method_ext = "_".join(
+                        val.lower() for val in re.findall("[A-Z][^A-Z]*", kind)
+                    )
+                    warning_message = "Cannot delete {kind} `{name}` as it does not exist.".format(
+                        kind=kind, name=name
+                    )
+                    if kind in [
+                        "PersistentVolumeClaim",
+                        "ConfigMap",
+                        "Service",
+                        "Secret",
+                    ]:
 
-                if kind in ["PersistentVolumeClaim", "ConfigMap", "Service", "Secret"]:
-                    try:
-                        method = "delete_namespaced_{ext}".format(ext=method_ext)
-                        getattr(self, method)(
-                            namespace="default", name=name, body=V1DeleteOptions()
-                        )
-                        logger.info("%s `%s` deleted", kind, name)
+                        try:
+                            method = "delete_namespaced_{ext}".format(ext=method_ext)
+                            getattr(self, method)(
+                                namespace="default", name=name, body=V1DeleteOptions()
+                            )
+                            logger.info("%s `%s` deleted", kind, name)
 
-                    except KubeApiException:
-                        logger.error(
-                            "Cannot delete %s `%s` as it already exists.", kind, name
-                        )
+                        except KubeApiException:
+                            logger.warning(warning_message)
 
-                if kind in ["PersistentVolume"]:
-                    try:
-                        getattr(self, "delete_persistent_volume")(
-                            name=name, body=V1DeleteOptions()
-                        )
-                        logger.info("%s `%s` deleted", kind, name)
+                    if kind in ["PersistentVolume"]:
+                        try:
+                            getattr(self, "delete_persistent_volume")(
+                                name=name, body=V1DeleteOptions()
+                            )
+                            logger.info("%s `%s` deleted", kind, name)
 
-                    except KubeApiException:
-                        logger.error(
-                            "Cannot delete %s `%s` as it already exists.", kind, name
-                        )
+                        except KubeApiException:
+                            logger.warning(warning_message)
 
-                if kind in ["Deployment"]:
-                    try:
-                        AppsV1Api().delete_namespaced_deployment(
-                            namespace="default", name=name, body=V1DeleteOptions()
-                        )
-                        logger.info("%s `%s` deleted", kind, name)
+                    if kind in ["Deployment"]:
+                        try:
+                            AppsV1Api().delete_namespaced_deployment(
+                                namespace="default", name=name, body=V1DeleteOptions()
+                            )
+                            logger.info("%s `%s` deleted", kind, name)
 
-                    except KubeApiException:
-                        logger.error(
-                            "Cannot delete %s `%s` as it already exists.", kind, name
-                        )
+                        except KubeApiException:
+                            logger.warning(warning_message)

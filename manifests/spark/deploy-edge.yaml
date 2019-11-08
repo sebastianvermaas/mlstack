@@ -55,6 +55,22 @@ spec:
       - name: spark-config
         configMap:
           name: spark
-      - name: cache
-        persistentVolumeClaim:
-          claimName: spark-cache
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spark-edge
+spec:
+  selector:
+    app: spark
+    role: edge
+  ports:
+    - name: driver
+      port: 31000
+      targetPort: 31000
+    - name: block-manager
+      port: 31001
+      targetPort: 31001
+    - name: app-ui
+      port: 4040
+      targetPort: 4040

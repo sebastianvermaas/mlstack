@@ -1,7 +1,7 @@
 """ Module """
 
 from mlstack.utils import logger, download_spark
-from mlstack.clients import DockerClient
+from mlstack.clients import DockerClient, KubernetesClient
 
 
 class MLStack:
@@ -29,11 +29,27 @@ Local Kubernetes cluster for machine learning engineering
         logger.info("Setting up MLStack. This will take a little while. Grab a coffee!")
         dockerclient = DockerClient()
 
-        images = [
+        repositories = [
             "tensorflow/tensorflow:latest-py3-jupyter",
             "openjdk:8-jdk-slim-stretch",
             "localstack/localstack:0.8.6",
         ]
-        dockerclient.pull_images(images=images)
+
+        images = ["tensorflow", "spark"]
+        dockerclient.pull_images(repositories=repositories)
         download_spark()
-        dockerclient.build_images(images=["spark"])
+        dockerclient.build_images(images=images)
+
+    def create(self):
+        """ Creates an MLStack local Kubernetes cluster """
+        logger.info("Creating an MLStack cluster in Kubernetes")
+        KubernetesClient().create_manifests(
+            ["spark", "tensorflow", "localstack"]
+        )
+
+    def close(self):
+        """ Close the MLStack cluster """
+        logger.info("Closing the MLStack cluster in Kubernetes")
+        KubernetesClient().delete_manifests(
+            ["spark", "tensorflow", "localstack"]
+        )
