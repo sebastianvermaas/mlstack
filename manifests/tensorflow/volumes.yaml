@@ -1,0 +1,26 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: tf-jobs
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: spark-cache
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: tf-jobs
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /tmp/spark/cache
