@@ -34,7 +34,7 @@ class DockerClient(docker.APIClient):
             logger.info("Building %s from %s", image, context_path)
 
             for line in self.build(
-                path=context_path,
+                path=context_path +"/.",
                 tag="mlstack-{image}:latest".format(image=image),
                 decode=True,
             ):
@@ -46,7 +46,7 @@ class DockerClient(docker.APIClient):
                 else:
                     logger.warning(line)
 
-            logger.info("Woohoo! Successfully built %s", image)
+            logger.info("Successfully built %s", image)
 
     def pull_images(self, images: list):
         """
@@ -62,9 +62,9 @@ class DockerClient(docker.APIClient):
                 if (bool(line.get("status", False))) & ("." not in line.get("id", "")):
                     sys.stdout.write(
                         "\r{id}: {status} {progress}".format(
-                            id=line.get("id"),
-                            status=line.get("status"),
-                            progress=line.get("progress"),
+                            id=line.get("id", ""),
+                            status=line.get("status", ""),
+                            progress=line.get("progress", ""),
                         )
                     )
-                    sys.stdout.flush()
+            print("\n")

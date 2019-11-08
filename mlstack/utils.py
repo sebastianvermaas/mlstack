@@ -1,5 +1,7 @@
 """ Submodule for defining general utility functions """
+from pathlib import Path
 import yaml
+import urllib
 import binascii
 import hashlib
 import logging
@@ -36,9 +38,22 @@ def read_yaml(config_path: str = None):
             raise yamlerror
 
 
-def install_dependencies():
-    spark_version = "2.4.4"
-    urls = [
-        "http://apache.mirror.anlx.net/spark/spark-{spark_version}/spark-"
-        "{spark_version}-bin-without-hadoop.tgz".format(spark_version=spark_version)
-    ]
+def download_spark():
+    """ Installs Spark """
+
+    spark_url = (
+        "http://apache.mirror.anlx.net/spark/spark-3.0.0-preview/"
+        "spark-3.0.0-preview-bin-hadoop3.2.tgz"
+    )
+
+    spark_path = Path(
+        str(Path(__file__).absolute()).replace("mlstack/utils.py", "build/spark/bin"),
+        spark_url.split("/")[-1],
+    )
+
+    if spark_path.exists():
+        logger.info("Spark Install file already exists")
+
+    else:
+        logger.info("Downloading Spark to %s\nfrom %s", spark_path, spark_url)
+        urllib.request.urlretrieve(spark_url, spark_path)

@@ -16,6 +16,4 @@ def main():
         parser.print_help()
 
     if args.command == "setup":
-        MLStack().setup(
-            images=["tensorflow/tensorflow", "pytorch/pytorch", "localstack/localstack"]
-        )
+        MLStack().setup()

@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:latest
+FROM tensorflow/tensorflow:latest-py3-jupyter
 
 RUN apt-get clean && \
     apt-get autoclean && \
@@ -7,18 +7,13 @@ RUN apt-get clean && \
     apt-get upgrade -yy && \
     apt-get install -yy git vim
 
-ARG VERSION=2.0
-ENV VERSION=$VERSION
+RUN mkdir /usr/tensorflow
+RUN mkdir /usr/tensorflow/input
+COPY model.py /usr/tensorflow/input/model.py
 
-#RUN pip install tensorflow==$VERSION
+RUN mkdir /usr/tensorflow/input/models
+RUN mkdir /usr/tensorflow/input/data
+RUN mkdir /usr/tensorflow/input/scripts
 
-RUN mkdir /opt/tensorflow
-RUN mkdir /opt/tensorflow/input
-COPY model.py /opt/tensorflow/input/model.py
-
-RUN mkdir /opt/tensorflow/input/models/
-RUN mkdir /opt/tensorflow/input/data
-RUN mkdir /opt/tensorflow/input/scripts
-
-WORKDIR /opt/tensorflow/input
-ENTRYPOINT sleep 1000
+WORKDIR /usr/tensorflow/input
+ENTRYPOINT ["/bin/bash"]

@@ -4,6 +4,4 @@ __pycache__/
 
 # From pip install
 *.egg-info
-
-
-/bin
+*.tgz
