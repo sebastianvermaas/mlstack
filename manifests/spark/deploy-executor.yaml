@@ -20,8 +20,8 @@ spec:
       hostname: spark-executor
       containers:
       - name: spark-executor
-        image: spark:latest
-        imagePullPolicy: IfNotPresent
+        image: mlstack-spark
+        imagePullPolicy: Never
         env:
         - name: SPARK_ROLE
           value: slave

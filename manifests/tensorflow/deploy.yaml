@@ -17,7 +17,7 @@ spec:
       containers:
       - name: tensorflow
         image: mlstack-tensorflow
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Never
         ports:
         - name: tensorflow
           containerPort: 80

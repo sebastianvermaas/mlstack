@@ -19,4 +19,4 @@ WORKDIR /usr/tensorflow/input
 
 RUN useradd -ms /bin/bash mlstack
 USER mlstack
-ENTRYPOINT sleep 100000
+ENTRYPOINT sleep infinity

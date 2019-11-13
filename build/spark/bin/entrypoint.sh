@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-source /tmp/common.sh
 source ~/.bashrc
 
 function finish() {
