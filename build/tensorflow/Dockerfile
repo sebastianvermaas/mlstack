@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:latest-py3-jupyter
+FROM tensorflow/tensorflow:latest-gpu-py3-jupyter
 
 RUN apt-get clean && \
     apt-get autoclean && \
@@ -16,4 +16,7 @@ RUN mkdir /usr/tensorflow/input/data
 RUN mkdir /usr/tensorflow/input/scripts
 
 WORKDIR /usr/tensorflow/input
-ENTRYPOINT ["/bin/bash"]
+
+RUN useradd -ms /bin/bash mlstack
+USER mlstack
+ENTRYPOINT sleep 100000

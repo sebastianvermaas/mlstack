@@ -16,7 +16,10 @@ spec:
     spec:
       containers:
       - name: tensorflow
-        image: tensorflow:latest
+        image: mlstack-tensorflow
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 80
+        - name: tensorflow
+          containerPort: 80
+        - name: jupyter
+          containerPort: 8888
