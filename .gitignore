@@ -5,3 +5,4 @@ __pycache__/
 # From pip install
 *.egg-info
 *.tgz
+*.DS_Store

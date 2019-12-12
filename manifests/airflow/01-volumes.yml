@@ -1,0 +1,52 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ds-airflow-dags
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: ds-airflow-dags
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ds-scripts
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: ds-scripts
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: ds-airflow-logs
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /tmp/airflow/logs
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ds-airflow-logs
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: ds-airflow-logs

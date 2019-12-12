@@ -1,0 +1,197 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: airflow
+data:
+  variables.json: |
+    {
+      "localstack_host": "localstack",
+      "dags_location": "/opt/airflow/dags",
+      "scripts_location": "/opt/spark/input/pyspark",
+      "scripts_pvc": "ds-scripts",
+      "cache_pvc": "spark-cache",
+      "spark_config_cm": "spark",
+      "spark_driver_image": "spark:latest",
+      "bucket_name": "local-sandbox",
+      "landing_zone_prefix": "landingzone",
+      "raw_prefix": "raw",
+      "cleansed_prefix": "cleansed",
+      "integrated_prefix": "integrated",
+      "archive_prefix": "archive"
+    }
+  airflow.cfg: |
+    [core]
+    airflow_home = /opt/airflow
+    dags_folder = /opt/airflow/dags
+    base_log_folder = /opt/airflow/logs
+    logging_level = INFO
+    executor = KubernetesExecutor
+    parallelism = 32
+    load_examples = False
+    plugins_folder = /opt/airflow/plugins
+    sql_alchemy_conn = $SQL_ALCHEMY_CONN
+    # custom
+    fernet_key = $FERNET_KEY
+    sql_alchemy_pool_size = 5
+    sql_alchemy_pool_recycle = 3600
+    dag_concurrency = 16
+    dags_are_paused_at_creation = True
+    non_pooled_task_slot_count = 128
+    max_active_runs_per_dag = 16
+    donot_pickle = False
+    dagbag_import_timeout = 30
+    default_impersonation =
+    security =
+    unit_test_mode = False
+
+    [scheduler]
+    dag_dir_list_interval = 300
+    child_process_log_directory = /opt/airflow/logs/scheduler
+    job_heartbeat_sec = 5
+    max_threads = 2
+    scheduler_heartbeat_sec = 5
+    run_duration = -1
+    min_file_process_interval = 0
+    statsd_on = False
+    statsd_host = localhost
+    statsd_port = 8125
+    statsd_prefix = airflow
+    min_file_parsing_loop_time = 1
+    print_stats_interval = 30
+    scheduler_zombie_task_threshold = 300
+    max_tis_per_query = 0
+    authenticate = True
+    auth_backend = airflow.contrib.auth.backends.password_auth
+    catchup_by_default = True
+
+    [webserver]
+    base_url = http://localhost:$AIRFLOW_SERVICE_PORT
+    web_server_host = 0.0.0.0
+    web_server_port = $AIRFLOW_SERVICE_PORT
+    web_server_ssl_cert =
+    web_server_ssl_key =
+    web_server_master_timeout = 120
+    web_server_worker_timeout = 120
+    worker_refresh_batch_size = 1
+    worker_refresh_interval = 30
+    secret_key = temporary_key
+    workers = 2
+    worker_class = sync
+    access_logfile = -
+    error_logfile = -
+    expose_config = True
+    authenticate = false
+    filter_by_owner = false
+    owner_mode = user
+    dag_default_view = tree
+    dag_orientation = LR
+    demo_mode = false
+    log_fetch_timeout_sec = 5
+    hide_paused_dags_by_default = false
+    page_size = 100
+    rbac = false
+
+    [smtp]
+    smtp_host = localhost
+    smtp_starttls = True
+    smtp_ssl = False
+    smtp_port = 25
+    smtp_mail_from = airflow@example.com
+
+    [kubernetes]
+    airflow_configmap = airflow
+    worker_container_repository = airflow
+    worker_container_tag = latest
+    worker_container_image_pull_policy = IfNotPresent
+    delete_worker_pods = True
+    dags_volume_claim = ds-airflow-dags
+    dags_volume_subpath =
+    logs_volume_claim = ds-airflow-logs
+    logs_volume_subpath =
+    in_cluster = True
+    namespace = default
+    gcp_service_account_keys =
+
+    [kubernetes_secrets]
+    SQL_ALCHEMY_CONN = airflow=sql_alchemy_conn
+    FERNET_KEY = airflow=fernet_key
+
+    [hive]
+    default_hive_mapred_queue =
+
+    [celery]
+    celery_app_name = airflow.executors.celery_executor
+    worker_concurrency = 16
+    worker_log_server_port = 8793
+    broker_url = sqla+mysql://airflow:airflow@localhost:3306/airflow
+    result_backend = db+mysql://airflow:airflow@localhost:3306/airflow
+    flower_host = 0.0.0.0
+    flower_url_prefix =
+    flower_port = 5555
+    default_queue = default
+    celery_config_options = airflow.config_templates.default_celery.DEFAULT_CELERY_CONFIG
+
+    [celery_broker_transport_options]
+    visibility_timeout = 21600
+    ssl_active = False
+    ssl_key =
+    ssl_cert =
+    ssl_cacert =
+
+    [dask]
+    cluster_address = 127.0.0.1:8786
+    tls_ca =
+    tls_cert =
+    tls_key =
+
+    [ldap]
+    uri =
+    user_filter = objectClass=*
+    user_name_attr = uid
+    group_member_attr = memberOf
+    superuser_filter =
+    data_profiler_filter =
+    bind_user = cn=Manager,dc=example,dc=com
+    bind_password = insecure
+    basedn = dc=example,dc=com
+    cacert = /etc/ca/ldap_ca.crt
+    search_scope = LEVEL
+
+    [mesos]
+    master = localhost:5050
+    framework_name = Airflow
+    task_cpu = 1
+    task_memory = 256
+    checkpoint = False
+    authenticate = False
+
+    [kerberos]
+    ccache = /tmp/airflow_krb5_ccache
+    principal = airflow
+    reinit_frequency = 3600
+    kinit_path = kinit
+    keytab = airflow.keytab
+
+    [cli]
+    api_client = airflow.api.client.json_client
+    endpoint_url = http://localhost:$AIRFLOW_SERVICE_PORT
+
+    [api]
+    auth_backend = airflow.api.auth.backend.default
+
+    [github_enterprise]
+    api_rev = v3
+
+    [admin]
+    hide_sensitive_variable_fields = True
+
+    [elasticsearch]
+    elasticsearch_host =
+
+    [operators]
+    default_owner = Airflow
+    default_cpus = 1
+    default_ram = 512
+    default_disk = 512
+    default_gpus = 0
