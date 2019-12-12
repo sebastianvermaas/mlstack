@@ -32,6 +32,11 @@ class KubernetesClient(KubeApi):
         KubeConfig.set_default(config)
         super().__init__()
 
+        namespaces = [item.metadata.name for item in KubeApi().list_namespace().items]
+        if "mlstack" not in namespaces:
+            self.create_namespace(body={'apiVersion': 'v1', 'kind': 'Namespace', 'metadata': {'name': 'mlstack'}})
+
+
     def create_manifests(self, components: list):
         """ Creates Kubernetes manifests """
         for component in components:
@@ -62,22 +67,23 @@ class KubernetesClient(KubeApi):
           components: A list of mlstack component manifests to create.
 
         """
+        warning_message = "KubeApiException on {kind} `{name}`. \n Exception:\n"
+
         for file in glob.glob(str(Path(self.manifests_dir, component)) + "/*.yaml"):
             generator = read_yaml(file)
             for body in generator:
                 if body:
+
                     kind = body.get("kind")
                     name = body.get("metadata").get("name")
                     method_ext = "_".join(
                         val.lower() for val in re.findall("[A-Z][^A-Z]*", kind)
                     )
-                    warning_message = (
-                        "Cannot create {kind} `{name}` as it already exists.\n"
-                        "Use `mlstack close `{component}` if you want to recreate "
-                        "the deployment\n".format(
-                            kind=kind, name=name, component=component
-                        )
+
+                    warning_message = "KubeApiException on {kind} `{name}`".format(
+                        kind=kind, name=name
                     )
+
                     if kind in [
                         "PersistentVolumeClaim",
                         "ConfigMap",
@@ -87,30 +93,30 @@ class KubernetesClient(KubeApi):
 
                         try:
                             method = "create_namespaced_{ext}".format(ext=method_ext)
-                            getattr(self, method)(namespace="default", body=body)
+                            getattr(self, method)(namespace="mlstack", body=body)
                             logger.info("%s `%s` created", kind, name)
 
-                        except KubeApiException:
-                            logger.warning(warning_message)
+                        except KubeApiException as exception:
+                            logger.warning(warning_message, exception)
 
                     if kind in ["PersistentVolume"]:
                         try:
                             getattr(self, "create_persistent_volume")(body=body)
                             logger.info("%s `%s` created", kind, name)
 
-                        except KubeApiException:
-                            logger.warning(warning_message)
+                        except KubeApiException as exception:
+                            logger.warning(warning_message, exception)
 
                     if kind in ["Deployment"]:
                         try:
 
                             AppsV1Api().create_namespaced_deployment(
-                                namespace="default", body=body
+                                namespace="mlstack", body=body
                             )
                             logger.info("%s `%s` created", kind, name)
 
-                        except KubeApiException:
-                            logger.warning(warning_message)
+                        except KubeApiException as exception:
+                            logger.warning(warning_message, exception)
 
     def delete_manifest(self, component: str):
         """
@@ -131,6 +137,7 @@ class KubernetesClient(KubeApi):
           components: A list of mlstack component manifests to create.
 
         """
+
         for file in glob.glob(str(Path(self.manifests_dir, component)) + "/*.yaml"):
             generator = read_yaml(file)
             for body in generator:
@@ -140,9 +147,11 @@ class KubernetesClient(KubeApi):
                     method_ext = "_".join(
                         val.lower() for val in re.findall("[A-Z][^A-Z]*", kind)
                     )
-                    warning_message = "Cannot delete {kind} `{name}` as it does not exist.".format(
+
+                    warning_message = "KubeApiException on {kind} `{name}`".format(
                         kind=kind, name=name
                     )
+
                     if kind in [
                         "PersistentVolumeClaim",
                         "ConfigMap",
@@ -153,12 +162,12 @@ class KubernetesClient(KubeApi):
                         try:
                             method = "delete_namespaced_{ext}".format(ext=method_ext)
                             getattr(self, method)(
-                                namespace="default", name=name, body=V1DeleteOptions()
+                                namespace="mlstack", name=name, body=V1DeleteOptions()
                             )
                             logger.info("%s `%s` deleted", kind, name)
 
-                        except KubeApiException:
-                            logger.warning(warning_message)
+                        except KubeApiException as exception:
+                            logger.warning(warning_message, exception)
 
                     if kind in ["PersistentVolume"]:
                         try:
@@ -167,15 +176,15 @@ class KubernetesClient(KubeApi):
                             )
                             logger.info("%s `%s` deleted", kind, name)
 
-                        except KubeApiException:
-                            logger.warning(warning_message)
+                        except KubeApiException as exception:
+                            logger.warning(warning_message, exception)
 
                     if kind in ["Deployment"]:
                         try:
                             AppsV1Api().delete_namespaced_deployment(
-                                namespace="default", name=name, body=V1DeleteOptions()
+                                namespace="mlstack", name=name, body=V1DeleteOptions()
                             )
                             logger.info("%s `%s` deleted", kind, name)
 
-                        except KubeApiException:
-                            logger.warning(warning_message)
+                        except KubeApiException as exception:
+                            logger.warning(warning_message, exception)

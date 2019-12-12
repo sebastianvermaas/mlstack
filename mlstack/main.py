@@ -43,13 +43,9 @@ Local Kubernetes cluster for machine learning engineering
     def create(self):
         """ Creates an MLStack local Kubernetes cluster """
         logger.info("Creating an MLStack cluster in Kubernetes")
-        KubernetesClient().create_manifests(
-            ["spark", "tensorflow", "localstack"]
-        )
+        KubernetesClient().create_manifests(["spark", "tensorflow", "localstack"])
 
     def close(self):
         """ Close the MLStack cluster """
         logger.info("Closing the MLStack cluster in Kubernetes")
-        KubernetesClient().delete_manifests(
-            ["spark", "tensorflow", "localstack"]
-        )
+        KubernetesClient().delete_manifests(["spark", "tensorflow", "localstack"])
