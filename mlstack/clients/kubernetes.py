@@ -34,8 +34,13 @@ class KubernetesClient(KubeApi):
 
         namespaces = [item.metadata.name for item in KubeApi().list_namespace().items]
         if "mlstack" not in namespaces:
-            self.create_namespace(body={'apiVersion': 'v1', 'kind': 'Namespace', 'metadata': {'name': 'mlstack'}})
-
+            self.create_namespace(
+                body={
+                    "apiVersion": "v1",
+                    "kind": "Namespace",
+                    "metadata": {"name": "mlstack"},
+                }
+            )
 
     def create_manifests(self, components: list):
         """ Creates Kubernetes manifests """

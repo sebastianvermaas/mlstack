@@ -44,29 +44,43 @@ conda activate mlstack
 # Install the Python library and CLI
 pip install -e .
 
-# Setup command for preparing Docker images
+# Setup command for building Docker images
 mlstack setup
 
 ```
 
 
 ## Usage
-### Building specific images
+
+
+### Build
+The `mlstack build` command builds the Docker images in the [build](build/) directory. Images that require additional python requirements can be built with the `--requirements` flag. For example:
+
+```bash
+mlstack build --image airflow --requirements requirements.txt
+```
+
+### Create
+The `mlstack create` command creates a Kubernetes cluster specified in the [manifests](manifests/).
+
+```bash
+
+mlstack create
+mlstack create --manifest spark --volume-mount mymount --host-path path/to/my/host
 
 ```
-mlstack build all
-mlstack build airflow --requirements requirements.txt
 
+### Close
+The `mlstack delete` command deletes a Kubernetes manifest.
 
-mlstack deploy all
-mlstack deploy spark --volumemount my-mount --hostpath path/to/my/host
-
-
-
-
+```bash
 mlstack close
-mlstack upload
+mlstack close --manifest spark
+```
 
-
+#### TODO
+```bash
 mlstack create bucket mybucket
 mlstack upload data --bucket mybucket
+```
+

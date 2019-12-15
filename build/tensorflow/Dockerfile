@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:latest-gpu-py3-jupyter
+FROM tensorflow/tensorflow:latest-py3-jupyter
 
 RUN apt-get clean && \
     apt-get autoclean && \
@@ -7,15 +7,15 @@ RUN apt-get clean && \
     apt-get upgrade -yy && \
     apt-get install -yy git vim
 
-RUN mkdir /usr/tensorflow
-RUN mkdir /usr/tensorflow/input
-COPY model.py /usr/tensorflow/input/model.py
+RUN mkdir /usr/mlstack
+RUN mkdir /usr/mlstack/input
+COPY model.py /usr/mlstack/input/model.py
 
-RUN mkdir /usr/tensorflow/input/models
-RUN mkdir /usr/tensorflow/input/data
-RUN mkdir /usr/tensorflow/input/scripts
+RUN mkdir /usr/mlstack/input/models
+RUN mkdir /usr/mlstack/input/data
+RUN mkdir /usr/mlstack/input/scripts
 
-WORKDIR /usr/tensorflow/input
+WORKDIR /usr/mlstack/input
 
 RUN useradd -ms /bin/bash mlstack
 USER mlstack

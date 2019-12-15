@@ -40,12 +40,14 @@ Local Kubernetes cluster for machine learning engineering
         download_spark()
         dockerclient.build_images(images=images)
 
-    def create(self):
+    @staticmethod
+    def create():
         """ Creates an MLStack local Kubernetes cluster """
         logger.info("Creating an MLStack cluster in Kubernetes")
         KubernetesClient().create_manifests(["spark", "tensorflow", "localstack"])
 
-    def close(self):
+    @staticmethod
+    def close():
         """ Close the MLStack cluster """
         logger.info("Closing the MLStack cluster in Kubernetes")
         KubernetesClient().delete_manifests(["spark", "tensorflow", "localstack"])
