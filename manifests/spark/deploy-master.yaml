@@ -20,7 +20,7 @@ spec:
       hostname: spark-master
       containers:
       - name: spark-master
-        image: spark:latest
+        image: mlstack-spark
         imagePullPolicy: IfNotPresent
         env:
         - name: SPARK_ROLE

@@ -21,8 +21,8 @@ spec:
       hostname: spark-edge
       containers:
       - name: spark-edge
-        image: spark:latest
-        imagePullPolicy: IfNotPresent
+        image: mlstack-spark
+        imagePullPolicy: Never
         env:
         - name: SPARK_ROLE
           value: edge

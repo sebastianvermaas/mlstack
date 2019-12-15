@@ -57,7 +57,7 @@ class DockerClient(docker.APIClient):
 
         """
         for repository in repositories:
-            logger.info("Pulling from %s\n", image)
+            logger.info("Pulling from %s\n", repository)
             for line in self.pull(repository, stream=True, decode=True):
                 if (bool(line.get("status", False))) & ("." not in line.get("id", "")):
                     sys.stdout.write(
